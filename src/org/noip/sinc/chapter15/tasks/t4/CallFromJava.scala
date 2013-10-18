@@ -1,5 +1,8 @@
 package org.noip.sinc.chapter15.tasks.t4
 
+import scala.annotation.varargs
+import scala.io.Source
+
 
 /**
  * Created with IntelliJ IDEA.

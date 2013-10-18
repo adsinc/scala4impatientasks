@@ -1,5 +1,7 @@
 package org.noip.sinc.chapter18
 
+import scala.collection.mutable.ArrayBuffer
+
 
 /**
  * Created by sinc on 31.08.13.
