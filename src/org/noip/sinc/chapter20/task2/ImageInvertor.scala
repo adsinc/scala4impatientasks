@@ -41,10 +41,10 @@ object ImageInvertorRunner extends App {
 		println("time=%d ms".format(time))
 	}
 
-	var img = javax.imageio.ImageIO.read(new File("src/org/noip/sinc/chapter20/task2/снимок6.png"))
+	var img = javax.imageio.ImageIO.read(new File("d:/prog/scala_projects/scala4impatientasks/src/org/noip/sinc/chapter20/task2/screenshot.gif"))
 	// один поток
 	profile(img, invertColors)
-	javax.imageio.ImageIO.write(img, "gif", new File("src/org/noip/sinc/chapter20/task2/снимок6_inverted.png"))
+	javax.imageio.ImageIO.write(img, "gif", new File("d:/prog/scala_projects/scala4impatientasks/src/org/noip/sinc/chapter20/task2/screenshot_inverted.gif"))
 
 	// на акторах
 	class ColorInvertor() extends Actor{
@@ -57,7 +57,7 @@ object ImageInvertorRunner extends App {
 
 	val parts = 2
 
-	img = javax.imageio.ImageIO.read(new File("src/org/noip/sinc/chapter20/task2/снимок6.png"))
+	img = javax.imageio.ImageIO.read(new File("d:/prog/scala_projects/scala4impatientasks/src/org/noip/sinc/chapter20/task2/screenshot.gif"))
 	val start = System.currentTimeMillis()
 	//******************************************
 	val futures = for(i <- 0.until(img.getHeight, img.getHeight / parts)) yield new ColorInvertor().start() !! Data(img, i, i + img.getHeight / parts)
@@ -65,7 +65,7 @@ object ImageInvertorRunner extends App {
 	//******************************************
 	val time = System.currentTimeMillis() - start
 	println("time=%d ms".format(time))
-	javax.imageio.ImageIO.write(img, "gif", new File("src/org/noip/sinc/chapter20/task2/снимок6_inverted_actors.png"))
+	javax.imageio.ImageIO.write(img, "gif", new File("d:/prog/scala_projects/scala4impatientasks/src/org/noip/sinc/chapter20/task2/screenshot_inverted_actors.png"))
 
 }
 
