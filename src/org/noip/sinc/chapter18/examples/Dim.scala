@@ -8,7 +8,7 @@ package org.noip.sinc.chapter18.examples
  */
 //abstract class Dim[T](val value: Double, val name: String) {
 //  protected def create(v: Double): T
-//  def +(other: Dim[T]) = create(value + other.value)
+//  def +(that: Dim[T]) = create(value + that.value)
 //  override def toString: String = value + " " + name
 //}
 //class Seconds(v: Double) extends Dim[Seconds](v, "s") {
