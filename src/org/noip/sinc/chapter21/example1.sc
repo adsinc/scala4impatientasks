@@ -1,5 +1,3 @@
-import java.io.File
-import scala.io.Source
 
 /**
  * Created with IntelliJ IDEA.
@@ -8,11 +6,11 @@ import scala.io.Source
  * @author dolgiy
  */
 //21.2
-class RichFile(val from: File) {
-	def read = Source.fromFile(from).mkString
-}
-implicit def file2RichFile(from: File) = new RichFile(from)
-val contents = new File("README.md").read
+//class RichFile(val from: File) {
+//	def read = Source.fromFile(from).mkString
+//}
+//implicit def file2RichFile(from: File) = new RichFile(from)
+//val contents = new File("README.md").read
 //21.1
 //class Fraction(val num: Int, val dnm: Int) {
 //	def *(that: Fraction) = new Fraction(num * that.num, dnm * that.dnm)
