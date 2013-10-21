@@ -5,6 +5,16 @@
  * Time: 14:36
  * @author dolgiy
  */
+//21.5
+//case class Delimiters(left: String, right: String)
+//object FrenchPunctuation {
+//	implicit val quoteDelimiters = new Delimiters("{", "}")
+//}
+//def quote(what: String)(implicit delims: Delimiters) =
+//	delims.left + what + delims.right
+//quote("Hello")(Delimiters("<<", ">>"))
+//import FrenchPunctuation.quoteDelimiters
+//quote("Hello")
 //21.2
 //class RichFile(val from: File) {
 //	def read = Source.fromFile(from).mkString
