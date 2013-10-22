@@ -5,6 +5,27 @@
  * Time: 14:36
  * @author dolgiy
  */
+//21.7
+//class Pair[T: Ordering](val first: T, val second: T) {
+//	def smaller(implicit ord: Ordering[T]) =
+//		if(ord.compare(first, second) < 0) first else second
+//}
+//Pair(40, 2)
+//class Pair[T: Ordering](val first: T, val second: T) {
+//	def smaller =
+//		if(implicitly[Ordering[T]].compare(first, second) < 0) first
+//		else second
+//}
+class Pair[T: Ordering](val first: T, val second: T) {
+	def smaller = {
+		import Ordered.orderingToOrdered
+		if(first < second) first else second
+	}
+}
+//21.6
+//def smaller[T](a: T, b: T)(implicit order: T => Ordered[T]) = if(a < b) a else b
+//smaller(2, 20)
+//smaller("Hello", "World")
 //21.5
 //case class Delimiters(left: String, right: String)
 //object FrenchPunctuation {
