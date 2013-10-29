@@ -26,5 +26,5 @@ object askingFor
 
 object FreeApi extends App{
 //	def askingFor(msg: String) = new Scanner(System.in).next()
-	Obtain aString askingFor "Your nапе" // and anInt askingFor "Your age" and aDouble askingFor "Your weight"
+//	Obtain aString askingFor "Your nапе" // and anInt askingFor "Your age" and aDouble askingFor "Your weight"
 }
