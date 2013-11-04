@@ -1,31 +1,33 @@
-import java.awt.Point
-
-//6
-class LexOrderedPoint(val p: Point) extends Ordered[Point] {
-	def compare(t: Point): Int =
-		if(p.x == t.x || p.y == t.y) 0
-		else if(p.x < t.x && p.y < t.y) -1
-		else 1
-}
-class OrderedByCenterPoint(val p: Point) extends Ordered[Point] {
-	import math.sqrt
-	def compare(t: Point): Int = fromCenter(p).compareTo(fromCenter(t))
-	def fromCenter(p: Point) = sqrt(p.x * p.x + p.y * p.y)
-}
-object PointConversions {
-	implicit def pointToLexOrderedPoint(point: Point) = new LexOrderedPoint(point)
-	implicit def pointToOrderedByCenterPoint(point: Point) = new OrderedByCenterPoint(point)
-}
-
-val p1 = new Point(-1, -1)
-val p2 = new Point(-2, -3)
-val p3 = new Point(1, 1)
-val p4 = new Point(1, 1)
-//	import PointConversions.pointToLexOrderedPoint
-import PointConversions.pointToOrderedByCenterPoint
-p1 > p2
-p2 > p3
-p3 == p4
+//10
+"abc".map(_.toUpper)
+"abc".map(_.toInt)
+//6 7
+//import java.awt.Point
+//class LexOrderedPoint(val p: Point) extends Ordered[Point] {
+//	def compare(t: Point): Int =
+//		if(p.x == t.x || p.y == t.y) 0
+//		else if(p.x < t.x && p.y < t.y) -1
+//		else 1
+//}
+//class OrderedByCenterPoint(val p: Point) extends Ordered[Point] {
+//	import math.sqrt
+//	def compare(t: Point): Int = fromCenter(p).compareTo(fromCenter(t))
+//	def fromCenter(p: Point) = sqrt(p.x * p.x + p.y * p.y)
+//}
+//object PointConversions {
+//	implicit def pointToLexOrderedPoint(point: Point) = new LexOrderedPoint(point)
+//	implicit def pointToOrderedByCenterPoint(point: Point) = new OrderedByCenterPoint(point)
+//}
+//
+//val p1 = new Point(-1, -1)
+//val p2 = new Point(-2, -3)
+//val p3 = new Point(1, 1)
+//val p4 = new Point(1, 1)
+////	import PointConversions.pointToLexOrderedPoint
+//import PointConversions.pointToOrderedByCenterPoint
+//p1 > p2
+//p2 > p3
+//p3 == p4
 //5
 //{
 //	class Fraction(val num: Int, val dnm: Int) {
