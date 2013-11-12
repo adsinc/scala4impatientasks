@@ -11,8 +11,8 @@ object Task2 extends App{
 	reset[String, Unit] {
 		val fileName = shift { k: (String => String) => cont = k ; () }
 		try {
-			contents = Source.fromFile(fileName, "UTF-8").mkString
-		} catch _ => ""
+				contents = Source.fromFile(fileName, "UTF-8").mkString
+		} catch { case _: Throwable => ""}
 		contents
 	}
 
