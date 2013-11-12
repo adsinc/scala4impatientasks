@@ -6,21 +6,19 @@ import scala.util.continuations._
 
 object Task2 extends App{
 	var cont: (String => String) = null
-	var fileName = "1.txt"
 	var contents = ""
 
-	reset {
-		while(contents == "") {
-			try{
-				contents = Source.fromFile(shift { k: (String => String) => cont = k }, "UTF-8").mkString
-			} catch { case _ => ""}
-		}
+	reset[String, Unit] {
+		val fileName = shift { k: (String => String) => cont = k ; () }
+		try {
+			contents = Source.fromFile(fileName, "UTF-8").mkString
+		} catch _ => ""
+		contents
 	}
 
 	if(contents == "") {
 		println("Try another filename: ")
-		fileName = readLine()
-		cont(fileName)
+		cont(readLine())
 	}
 	println(contents)
 }
