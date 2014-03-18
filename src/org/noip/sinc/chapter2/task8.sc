@@ -1,0 +1,7 @@
+def product(s: String) = s.foldLeft(1L)(_ * _.toLong)
+product("1")
+product("H")
+product("He")
+product("Hel")
+product("Hell")
+product("Hello")
