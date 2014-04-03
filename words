@@ -1,0 +1,10 @@
+The .idea (1) folder contains a number of subfolders, mainly with internal IntelliJ IDEA information.
+
+The src (2) folder contains the MyActivity.java (3) file source code that implements the functionality of your application. The file belongs to the com.example package.
+
+The res (4) folder contains various visual resources.
+ The layout/main.xml file (5) defines the appearance of the application constituted of resources of various types.
+ The values folder (6) is intended for storing .xml files that describe resources of various types. Presently, the folder contains a strings.xml file with String resources definitions. As you will see from the  Adding a Color section, the layout folder can also contain, for example, a descriptor of colors.
+ The drawable folders contain images (7).
+
+The gen (8) folder contains the R.java (9) file that links the visual resources and the Java source code. As you will see from the sections below, IntelliJ IDEA supports tight integration between static resources and R.java. As soon as any resources are added or removed, the corresponding classes and class fields in R.java are automatically generated or removed accordingly. The R.java file also belongs to the com.example package.
