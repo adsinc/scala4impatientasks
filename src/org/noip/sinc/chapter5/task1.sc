@@ -9,4 +9,3 @@ for(i <- 0 to Int.MaxValue - 1) counter.increment()
 counter.increment()
 println(counter.current())
 
-
