@@ -1,0 +1,5 @@
+def lteqgt(values: Array[Int], v: Int) = (values count {_ < v}, values count {_ == v}, values count {_ > v} )
+val a = Array(1, -2, 3, 4, 5, 6, 2, 5, 1, -1, 2)
+lteqgt(a, 2)
+lteqgt(a, 1)
+lteqgt(a, 4)
