@@ -16,8 +16,4 @@ def tabsToWhiteSpace(s: String, tabSize: Int) = {
 }
 val out = new PrintWriter(path2)
 out.write(lines.map(tabsToWhiteSpace(_, 8)).mkString("\n"))
-
-
-
-
 out.close()
