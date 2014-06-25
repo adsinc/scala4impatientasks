@@ -8,7 +8,7 @@ class Union(private val data: Array[Int]) {
     new Union(data.map(x => if(x == i) j else x))
   }
 
-  def connected(a: Int, b: Int): Boolean = ???
+  def connected(a: Int, b: Int): Boolean = data(a) == data(b)
 
   override def toString: String = data mkString " "
 }
