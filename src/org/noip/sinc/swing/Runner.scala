@@ -3,9 +3,6 @@ package org.noip.sinc.swing
 import scala.swing.{Label, Dimension, MainFrame}
 
 /**
- * Created with IntelliJ IDEA.
- * Date: 16.10.13
- * Time: 23:11
  * @author dolgiy
  */
 class UI extends MainFrame {
