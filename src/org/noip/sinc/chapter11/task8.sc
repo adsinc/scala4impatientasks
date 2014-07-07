@@ -7,9 +7,11 @@ class Matrix(val data: List[List[Int]]) {
     (data zip b.data).map(p => (p._1 zip p._2).map(x => x._1 + x._2))
   )
 
-  def * (b: Matrix) = ???
-
-  def trans = new Matrix(???)
+  def * (b: Matrix) = new Matrix (
+    for(ar <- data) yield
+      for(br <- b.data.transpose) yield
+        (ar zip br map (p => p._1 * p._2)).sum
+  )
 
   def * (x: Int) = new Matrix(data map {_ map {_ * x}})
 
@@ -28,4 +30,5 @@ val b = new Matrix(List(
 
 a * 2
 a + b
+a * b
 
