@@ -1,0 +1,1 @@
+Array(1, 2, 4, -1, 9) reduceLeft math.max
