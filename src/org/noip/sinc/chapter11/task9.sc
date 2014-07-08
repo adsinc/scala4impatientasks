@@ -9,7 +9,7 @@ object RichFile {
 //    Option(dir, name drop 1 , ext drop 1)
 //  }
 
-  def unapplySeq(file: File): Option[Seq[String]] = Some(file.getPath split File.pathSeparator)
+  def unapplySeq(file: File): Option[Seq[String]] = Some(file.getPath split File.separator)
 }
 
 val f = new File("/home/sinc/hello.txt")
