@@ -1,4 +1,6 @@
-def factorial(n: Int) = 1 to n reduceLeft (_ * _)
+def factorial(n: Int) =
+  if(n < 1) throw new IllegalArgumentException
+  else 1 to n reduceLeft (_ * _)
 
 factorial(1)
 factorial(2)
