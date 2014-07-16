@@ -10,7 +10,8 @@ import sys.process._
 val prop = new Properties()
 prop.load(new FileInputStream("/home/dolgiy/scalaProgs/scala4impatientasks/src/org/noip/sinc/merge/config.properties"))
 
-def getPropAsList(propName: String) = (prop.getProperty(propName) split ",").toList
+def getPropAsList(propName: String) =
+  (prop.getProperty(propName) split ",").toList map (_.trim)
 
 val repPath = "/home/dolgiy/ProjectRep/imus"
 val logDir = "/home/dolgiy/ProjectRep/imus/branches/scriptLogs/"
