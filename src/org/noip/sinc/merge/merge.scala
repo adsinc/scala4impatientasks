@@ -2,19 +2,23 @@
  * @author dolgiy
  */
 
-import java.io.File
+import java.io.{FileInputStream, File}
+import java.util.Properties
 
 import sys.process._
-val revisions = Array(49938, 49950)
+
+val prop = new Properties()
+prop.load(new FileInputStream("/home/dolgiy/scalaProgs/scala4impatientasks/src/org/noip/sinc/merge/config.properties"))
+
+def getPropAsList(propName: String) = (prop.getProperty(propName) split ",").toList
+
 val repPath = "/home/dolgiy/ProjectRep/imus"
 val logDir = "/home/dolgiy/ProjectRep/imus/branches/scriptLogs/"
-val branches = Array(
-//  "imus-1.5.440"
-//  "imus-1.5.540",
-  "imus-1.6"
-//  "imus-1.5.330",
-//  "imus-1.5.449-mrg"
-)
+// номера ревизий из свойства
+val revisions = getPropAsList("revisions") map (_.toInt)
+// измена папок бранчей из свойства
+val branches = getPropAsList("versions")
+
 def update(path: String) {
   println("Updating " + path)
   val cmd = Seq("svn", "up")
@@ -41,16 +45,16 @@ def install(path: String) {
 //  p !< ProcessLogger(f)
 }
 
-println("updating")
+//println("updating")
 branches.foreach(p => update(repPath + "/branches/" + p))
 
-//println("merging")
-//for {
-//  br <- branches
-//  r <- revisions
-//} merge(r, br)
+println("merging")
+for {
+  br <- branches
+  r <- revisions
+} merge(r, br)
 
 //installing
-branches.foreach(install)
+//branches.foreach(install)
 
 
