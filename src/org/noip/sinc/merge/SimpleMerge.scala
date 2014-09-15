@@ -1,11 +1,10 @@
 package org.noip.sinc.merge
 
-import java.io.FileInputStream
-import java.util.Properties
+import com.typesafe.config.ConfigFactory
 
 import scala.collection.mutable
 import scala.swing._
-import scala.swing.event.{ValueChanged, SelectionChanged}
+import scala.swing.event.{SelectionChanged, ValueChanged}
 
 object SimpleMerge extends App {
 	val win = new MergeFrame
@@ -89,17 +88,16 @@ class MainPanel(branches: Seq[String], revisions: Seq[Int]) extends BoxPanel(Ori
 	}
 }
 
+object MergeHelper {
+
+}
+
 object Context {
-	val prop = new Properties()
-	prop.load(new FileInputStream("/home/dolgiy/scalaProgs/scala4impatientasks/src/org/noip/sinc/merge/config.properties"))
-
+	import scala.collection.JavaConversions.iterableAsScalaIterable
+	val conf = ConfigFactory.load("org/noip/sinc/merge/config").getConfig("org.noip.sinc.merge")
 	// измена папок бранчей из свойства
-	val branches = prop.getPropList("versions")
+	val branches: Seq[String] = conf.getStringList("versions").toSeq
 	// номера ревизий из свойства
-	val revisions = prop.getPropList("revisions") map (_.toInt)
+	val revisions: Seq[Int] = (conf.getIntList("revisions") map (_.toInt)).toSeq
 
-	implicit class RichProperties(val prop: Properties) {
-		def getPropList(propName: String) =
-			(prop.getProperty(propName) split ",").toList map (_.trim)
-	}
 }
