@@ -4,11 +4,10 @@ import java.io.File
 
 import com.typesafe.config.ConfigFactory
 import org.noip.sinc.merge.Context.{localRepPath, remoteRepPath}
-import org.noip.sinc.merge.MergeHelper.update
+import org.noip.sinc.merge.MergeHelper.{install, mergeAll, updateAll}
 
 import scala.collection.mutable
 import scala.swing._
-import scala.swing.event.{SelectionChanged, ValueChanged}
 import scala.sys.process.{Process, ProcessLogger}
 
 object SimpleMerge extends App {
@@ -40,18 +39,16 @@ class MainPanel(branches: Seq[String], revisions: Seq[Int]) extends BoxPanel(Ori
 	val revField = new TextField(revisions.mkString(", "))
 	listenTo(revField)
 
-	reactions += {
-		case e: SelectionChanged => state("versions") = verList.selection.items
-		case e: ValueChanged => state("revisions") = revField.text
-	}
-
 	addComponent("Versions", new ScrollPane(verList))
 	addComponent("Revisions", revField)
 	contents += new Separator()
 	addComponent("Merge", new CheckBox())
 	addComponent("Install", new CheckBox())
 	contents += new Button(Action("Start") {
-		state("versions") foreach (p => update(s"$localRepPath/branches/$p"))
+		val vs = verList.selection.items
+		updateAll(vs)
+		if(false) mergeAll(vs, revField.text split "[,]" map (_.trim.toInt))
+		if(false) vs.foreach(install)
 	})
 	contents foreach setPrefHeight
 	justify(labels)
@@ -96,6 +93,14 @@ class MainPanel(branches: Seq[String], revisions: Seq[Int]) extends BoxPanel(Ori
 }
 
 object MergeHelper {
+
+	def updateAll(vs: Seq[Any]) = vs foreach (p => update(s"$localRepPath/branches/$p"))
+
+	def mergeAll(vs: Seq[String], rv: Seq[Int]) = 	for {
+		v <- vs
+		r <- rv
+	} merge(r, v)
+
 	def update(path: String) {
 		println("Updating " + path)
 		val cmd = Seq("svn", "up")
