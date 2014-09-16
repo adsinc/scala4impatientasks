@@ -1,10 +1,15 @@
 package org.noip.sinc.merge
 
+import java.io.File
+
 import com.typesafe.config.ConfigFactory
+import org.noip.sinc.merge.Context.{localRepPath, remoteRepPath}
+import org.noip.sinc.merge.MergeHelper.update
 
 import scala.collection.mutable
 import scala.swing._
 import scala.swing.event.{SelectionChanged, ValueChanged}
+import scala.sys.process.{Process, ProcessLogger}
 
 object SimpleMerge extends App {
 	val win = new MergeFrame
@@ -45,7 +50,9 @@ class MainPanel(branches: Seq[String], revisions: Seq[Int]) extends BoxPanel(Ori
 	contents += new Separator()
 	addComponent("Merge", new CheckBox())
 	addComponent("Install", new CheckBox())
-	contents += new Button("Merge")
+	contents += new Button(Action("Start") {
+		state("versions") foreach (p => update(s"$localRepPath/branches/$p"))
+	})
 	contents foreach setPrefHeight
 	justify(labels)
 
@@ -89,7 +96,25 @@ class MainPanel(branches: Seq[String], revisions: Seq[Int]) extends BoxPanel(Ori
 }
 
 object MergeHelper {
+	def update(path: String) {
+		println("Updating " + path)
+		val cmd = Seq("svn", "up")
+		val p = Process(cmd, new File(path))
+		p !< ProcessLogger(s => println(s))
+	}
 
+	def merge(revNum: Int, pathTo: String) {
+		println("Merging %d to %s".format(revNum, pathTo))
+		val cmd = Seq("svn", "merge", "-r%d:%d".format(revNum - 1, revNum), remoteRepPath, ".")
+		val p = Process(cmd, new File(localRepPath + "/branches/" + pathTo))
+		p !< ProcessLogger(s => println(s))
+	}
+
+	def install(path: String) {
+		val cmd = Seq("mvn", "-DskipTests", "install")
+		val p = Process(cmd, new File(localRepPath + "/branches/" + path))
+		p !< ProcessLogger(s => println(s))
+	}
 }
 
 object Context {
@@ -99,5 +124,6 @@ object Context {
 	val branches: Seq[String] = conf.getStringList("versions").toSeq
 	// номера ревизий из свойства
 	val revisions: Seq[Int] = (conf.getIntList("revisions") map (_.toInt)).toSeq
-
+	val localRepPath = conf.getString("localRepPath")
+	val remoteRepPath = conf.getString("remoteRepPath")
 }
