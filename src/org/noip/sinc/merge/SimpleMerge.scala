@@ -7,6 +7,8 @@ import org.noip.sinc.merge.Context.{localRepPath, remoteRepPath}
 import org.noip.sinc.merge.MergeHelper.{install, mergeAll, updateAll}
 
 import scala.collection.mutable
+import scala.concurrent.{Future, future}
+import scala.concurrent.ExecutionContext.Implicits._
 import scala.swing._
 import scala.sys.process.{Process, ProcessLogger}
 
@@ -45,10 +47,25 @@ class MainPanel(branches: Seq[String], revisions: Seq[Int]) extends BoxPanel(Ori
 	addComponent("Merge", new CheckBox())
 	addComponent("Install", new CheckBox())
 	contents += new Button(Action("Start") {
-		val vs = verList.selection.items
-		updateAll(vs)
-		if(false) mergeAll(vs, revField.text split "[,]" map (_.trim.toInt))
-		if(false) vs.foreach(install)
+
+		//todo fix
+		components foreach (_.enabled = false)
+
+		val backgroundOperation: Future[Unit] = future {
+			val vs = verList.selection.items
+			updateAll(vs)
+			if(true) mergeAll(vs, revField.text split "[,]" map (_.trim.toInt))
+			if(false) vs.foreach(install)
+		}
+
+		backgroundOperation onSuccess {
+			case result => Swing.onEDT {
+				//todo fix
+				components foreach (_.enabled = true)
+			}
+		}
+
+
 	})
 	contents foreach setPrefHeight
 	justify(labels)
