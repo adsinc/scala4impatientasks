@@ -3,6 +3,10 @@ package org.noip.sinc.swing2d
 import java.awt.event.{ActionEvent, ActionListener}
 import javax.swing.Timer
 
+import org.noip.sinc.chapter7.random
+import org.noip.sinc.swing2d.Context
+
+import scala.swing.Reactions.Reaction
 import scala.swing._
 import scala.swing.event.Event
 import scala.util.Random
@@ -24,31 +28,28 @@ case class Ball(r: Int, x: Int, y: Int) {
 }
 
 class BallsComponent extends Component {
-
-  def apply(e: Event) { println("tick")}
-
   preferredSize = new Dimension(800, 600)
-  val rand = new Random
-  lazy val balls = createBalls(10)
-  listenTo(new Controller)
+	var balls = Seq[Ball]()
 
-  def createBalls(n: Int): Seq[Ball] = 0 until n map {_ =>
-    new Ball(10, rand.nextInt(size.width), rand.nextInt(size.height))
-  }
+	listenTo(new Controller(createBalls(10)))
+	reactions += {
+		case be: BallEvent => balls = be.balls; repaint()
+	}
+
+  def createBalls(n: Int): Seq[Ball] = {
+		if(size.width <= 0 || size.height <= 0) Seq()
+		else 0 until n map { _ =>
+			new Ball(10, Context.random.nextInt(size.width), Context.random.nextInt(size.height))
+		}
+	}
 
   override protected def paintComponent(g: Graphics2D) = {
     balls foreach (_ draw g)
   }
 }
 
-class Controller extends Publisher {
-  new Timer(100, new ActionListener {
-    def actionPerformed(e: ActionEvent) = {
-      publish(null)
-    }
-  }).start()
-}
-
 object Context extends MainContext {
   val g: Double = 9.8
+	val tick: Int = 50
+	val random = new Random
 }
