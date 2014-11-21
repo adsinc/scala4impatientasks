@@ -3,10 +3,9 @@ import scala.collection.mutable.ArrayBuffer
 class Network {
   class Member(name: String) {
     val contacts = new ArrayBuffer[Network#Member]()
-    override def equals(obj: scala.Any) = obj match {
-      case null => false
-      case a:Member => a == this
-      case _ => false
+    def equals(obj: Network#Member) = {
+      if(obj == null) false
+      else members contains obj
     }
   }
 
