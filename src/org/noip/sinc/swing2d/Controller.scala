@@ -1,12 +1,13 @@
 package org.noip.sinc.swing2d
 
+import java.awt.Dimension
 import java.awt.event.{ActionEvent, ActionListener}
 import javax.swing.Timer
 
 import scala.swing.Publisher
 import scala.swing.event.Event
 
-class Controller(balls: => Seq[Ball]) extends Publisher {
+class Controller(balls: => Seq[Ball], size: => Dimension) extends Publisher {
 	var bs: Seq[Ball] = null
 	new Timer(Context.tick, new ActionListener {
 		def actionPerformed(e: ActionEvent) = {
@@ -18,9 +19,9 @@ class Controller(balls: => Seq[Ball]) extends Publisher {
 
 	def moveBalls(balls: Seq[Ball]) = balls map {
 			b => {
-				val v = b.velocity + dv
-				println(v)
-				b copy (velocity = v, y = (b.y + v).toInt)
+				val sign = if (b.y > size.height) -1 else 1
+				val v = b.velocity + dv * sign
+				b copy (velocity = v * sign, y = (b.y + v * sign).toInt)
 			}
 		}
 

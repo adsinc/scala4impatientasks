@@ -8,7 +8,7 @@ class BallsComponent extends Component {
   preferredSize = new Dimension(800, 600)
   var balls = Seq[Ball]()
 
-  listenTo(new Controller(createBalls(Context.ballCount)))
+  listenTo(new Controller(createBalls(Context.ballCount), size))
 
   reactions += {
     case be: BallEvent => balls = be.balls; repaint()
