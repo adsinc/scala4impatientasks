@@ -4,7 +4,7 @@ import scala.util.Random
 
 object Context extends MainContext {
   val g: Double = 10
-  val tick: Int = 100
+  val tick: Int = 5
   val random = new Random
   val ballCount = 1
 }

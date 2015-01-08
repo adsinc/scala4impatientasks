@@ -7,7 +7,7 @@ import org.noip.sinc.swing2d.Vector2D.Zero
 import scala.swing._
 
 class BallsComponent extends Component {
-  preferredSize = new Dimension(800, 600)
+  preferredSize = new Dimension(100, 200)
   var balls = Seq[Ball]()
 
   listenTo(new Controller(createBalls(Context.ballCount), size))
@@ -21,7 +21,7 @@ class BallsComponent extends Component {
     if(size.width <= 0 || size.height <= 0) Seq[Ball]()
     else 0 until n map { _ =>
 //      new Ball(10, Context.random.nextInt(size.width), Context.random.nextInt(size.height))
-      new Ball(10, Context.random.nextInt(size.width), 0)
+      new Ball(10, Point2D(Context.random.nextInt(size.width), 0))
     }
   }
 
@@ -30,6 +30,6 @@ class BallsComponent extends Component {
   }
 }
 
-case class Ball(r: Int, x: Int, y: Int, velocity: Vector2D = Zero) {
-  def draw(g: Graphics2D) = g.fillOval(x, y, r, r)
+case class Ball(r: Int, center: Point2D, velocity: Vector2D = Zero) {
+  def draw(g: Graphics2D) = g.fillOval(center.x.toInt, center.y.toInt, r, r)
 }

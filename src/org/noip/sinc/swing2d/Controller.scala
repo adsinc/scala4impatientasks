@@ -17,18 +17,14 @@ class Controller(balls: => Seq[Ball], size: => Dimension) extends Publisher {
 		}
 	}).start()
 
-	def moveBalls(balls: Seq[Ball]) = balls map {
-			b => {
-				val sign = if (b.y > size.height) -1 else 1
-				val v = b.velocity + dv * sign
-				b copy (velocity = v * sign, y = (b.y + v.y * sign).toInt)
-			}
-		}
+	def moveBalls(balls: Seq[Ball]) = balls map fall
 
 	val dv = Vector2D(0, Context.g * Context.tick / 1000)
 
 	def fall(b: Ball) = {
-
+		val sign = if (b.center.y + b.r >= size.height) -1 else 1
+		val v = b.velocity * sign + dv
+		b copy (velocity = v, center = b.center + v)
 	}
 }
 
