@@ -2,6 +2,8 @@ package org.noip.sinc.swing2d
 
 import java.awt.Dimension
 
+import org.noip.sinc.swing2d.Vector2D.Zero
+
 import scala.swing._
 
 class BallsComponent extends Component {
@@ -28,6 +30,6 @@ class BallsComponent extends Component {
   }
 }
 
-case class Ball(r: Int, x: Int, y: Int, velocity: Double = 0) {
+case class Ball(r: Int, x: Int, y: Int, velocity: Vector2D = Zero) {
   def draw(g: Graphics2D) = g.fillOval(x, y, r, r)
 }

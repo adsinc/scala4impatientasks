@@ -21,11 +21,15 @@ class Controller(balls: => Seq[Ball], size: => Dimension) extends Publisher {
 			b => {
 				val sign = if (b.y > size.height) -1 else 1
 				val v = b.velocity + dv * sign
-				b copy (velocity = v * sign, y = (b.y + v * sign).toInt)
+				b copy (velocity = v * sign, y = (b.y + v.y * sign).toInt)
 			}
 		}
 
-	val dv = Context.g * Context.tick / 1000
+	val dv = Vector2D(0, Context.g * Context.tick / 1000)
+
+	def fall(b: Ball) = {
+
+	}
 }
 
 case class BallEvent(balls: Seq[Ball]) extends Event
