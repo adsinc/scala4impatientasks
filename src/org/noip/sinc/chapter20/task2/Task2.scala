@@ -9,14 +9,15 @@ import org.noip.sinc.chapter20.task2.Helper.{invertColors, stopWatch}
 
 object Main extends App {
 
-//	val img = ImageIO.read(new File("big_image.jpg"))
-	val img = ImageIO.read(new URL("http://cstrips.bitstrips.com/XDSDS_925V.png"))
+	val img = ImageIO.read(new File("big_image.png"))
 
 	stopWatch() {
 		invertColors(img)
 	}
+	val f = new File("out.png")
+	ImageIO.write(img, "png", f)
 
-	ImageIO.write(img, "jpg", new File("out.jpg"))
+
 }
 
 object Helper {
