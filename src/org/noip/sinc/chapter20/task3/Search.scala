@@ -35,7 +35,7 @@ trait BaseActor extends Actor {
   val onReceive: PartialFunction[Any, Unit]
 
   def act() {
-    while(!exit) {
+    while(!stopActor) {
       receive (onReceive)
     }
   }
