@@ -1,13 +1,14 @@
-package org.noip.sinc.chapter20.task3
+package org.noip.sinc.chapter20.task4
 
 import java.io.File
 
 import scala.actors.Actor
+import scala.collection.immutable.TreeSet
 import scala.io.Source
 import scala.util.matching.Regex
 
 object Search extends App {
-  Visitor("""class""".r).start() ! BaseDirMsg(new File("src"))
+  Visitor("""App""".r).start() ! BaseDirMsg(new File("src"))
 }
 
 case class Visitor(regex: Regex) extends BaseActor {
@@ -36,7 +37,10 @@ case class Matcher(r: Regex, acc: Accumulator) extends BaseActor {
 
   val onReceive: PartialFunction[Any, Unit] = {
     case BaseDirMsg(file) => {
-      acc ! Result(r.findAllMatchIn(Source.fromFile(file).mkString).size)
+      r.findFirstIn(Source.fromFile(file).mkString) match {
+        case Some(s) => acc ! file
+        case None => acc ! "NotFound"
+      }
       stopActor = true
     }
     case _ => new Error("Incorrect msg")
@@ -47,20 +51,20 @@ class Accumulator extends BaseActor {
 
   var fcnt = -1
   var received = 0
-  var result = 0
+  var result = TreeSet[String]()
 
   def stopActor = fcnt >= 0 && received >= fcnt
 
   val onReceive: PartialFunction[Any, Unit] = {
-    case Result(cnt) => result += cnt; received += 1
+    case f: File => result += f.getAbsolutePath; received += 1
+    case "NotFound" => received += 1
     case cnt: Int => fcnt = cnt
   }
 
-  override def beforeExit() = println(result)
+  override def beforeExit() = result foreach println
 }
 
 case class BaseDirMsg(dir: File)
-case class Result(count: Int)
 
 trait BaseActor extends Actor {
   def stopActor: Boolean
