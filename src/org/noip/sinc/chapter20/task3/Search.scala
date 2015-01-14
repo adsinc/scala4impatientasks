@@ -3,11 +3,12 @@ package org.noip.sinc.chapter20.task3
 import java.io.File
 
 import scala.actors.Actor
+import scala.collection.immutable.TreeSet
 import scala.io.Source
 import scala.util.matching.Regex
 
 object Search extends App {
-  Visitor("""[.]*App[.]*""".r).start() ! BaseDirMsg(new File("src"))
+  Visitor("""App""".r).start() ! BaseDirMsg(new File("src"))
 }
 
 case class Visitor(regex: Regex) extends BaseActor {
@@ -21,13 +22,13 @@ case class Visitor(regex: Regex) extends BaseActor {
   }
 
   val onReceive: PartialFunction[Any, Unit] = {
-    case BaseDirMsg(dir) => visitFiles(dir); stopActor = true
+    case BaseDirMsg(dir) => acc ! visitFiles(dir);stopActor = true
     case _ => new Error("Incorrect msg")
   }
 
-  def visitFiles(f: File): Unit =
-    if(f.isDirectory) f.listFiles() foreach visitFiles
-    else Matcher(regex, acc).start() ! BaseDirMsg(f)
+  def visitFiles(f: File): Int =
+    if(f.isDirectory) (f.listFiles() map visitFiles).sum
+    else {Matcher(regex, acc).start() ! BaseDirMsg(f); 1}
 }
 
 case class Matcher(r: Regex, acc: Accumulator) extends BaseActor {
@@ -38,7 +39,7 @@ case class Matcher(r: Regex, acc: Accumulator) extends BaseActor {
     case BaseDirMsg(file) => {
       r.findFirstIn(Source.fromFile(file).mkString) match {
         case Some(s) => acc ! file
-        case None =>
+        case None => acc ! "NotFound"
       }
       stopActor = true
     }
@@ -48,11 +49,19 @@ case class Matcher(r: Regex, acc: Accumulator) extends BaseActor {
 
 class Accumulator extends BaseActor {
 
-  def stopActor: Boolean = false
+  var fcnt = -1
+  var received = 0
+  var result = TreeSet[String]()
+
+  def stopActor = fcnt >= 0 && received >= fcnt
 
   val onReceive: PartialFunction[Any, Unit] = {
-    case f: File => println(f.getAbsolutePath)
+    case f: File => result += f.getAbsolutePath; received += 1
+    case "NotFound" => received += 1
+    case cnt: Int => fcnt = cnt
   }
+
+  override def beforeExit() = result foreach println
 }
 
 case class BaseDirMsg(dir: File)
@@ -60,11 +69,14 @@ case class BaseDirMsg(dir: File)
 trait BaseActor extends Actor {
   def stopActor: Boolean
 
-  val onReceive: PartialFunction[Any, Unit]
+  def onReceive: PartialFunction[Any, Unit]
+
+  def beforeExit() = ()
 
   def act() {
     while(!stopActor) {
       receive (onReceive)
     }
+    beforeExit()
   }
 }
