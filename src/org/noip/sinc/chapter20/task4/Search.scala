@@ -8,7 +8,7 @@ import scala.io.Source
 import scala.util.matching.Regex
 
 object Search extends App {
-  Visitor("""App""".r).start() ! BaseDirMsg(new File("src"))
+  Visitor("c[\\w]*s".r).start() ! BaseDirMsg(new File("src"))
 }
 
 case class Visitor(regex: Regex) extends BaseActor {
@@ -37,7 +37,7 @@ case class Matcher(r: Regex, acc: Accumulator) extends BaseActor {
 
   val onReceive: PartialFunction[Any, Unit] = {
     case BaseDirMsg(file) => {
-      acc ! r.findAllMatchIn(Source.fromFile(file).mkString).toSeq
+      acc ! Result(r.findAllMatchIn(Source.fromFile(file).mkString).map(_.matched).toSet)
       stopActor = true
     }
     case _ => new Error("Incorrect msg")
@@ -53,8 +53,7 @@ class Accumulator extends BaseActor {
   def stopActor = fcnt >= 0 && received >= fcnt
 
   val onReceive: PartialFunction[Any, Unit] = {
-    case f: File => result += f.getAbsolutePath; received += 1
-    case "NotFound" => received += 1
+    case Result(r) => result ++= r; received += 1
     case cnt: Int => fcnt = cnt
   }
 
@@ -62,7 +61,7 @@ class Accumulator extends BaseActor {
 }
 
 case class BaseDirMsg(dir: File)
-case class Result(dir: File, matches: Seq[String])
+case class Result(matches: Set[String])
 
 trait BaseActor extends Actor {
   def stopActor: Boolean
