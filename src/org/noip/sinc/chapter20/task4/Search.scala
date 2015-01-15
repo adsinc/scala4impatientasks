@@ -37,10 +37,7 @@ case class Matcher(r: Regex, acc: Accumulator) extends BaseActor {
 
   val onReceive: PartialFunction[Any, Unit] = {
     case BaseDirMsg(file) => {
-      r.findFirstIn(Source.fromFile(file).mkString) match {
-        case Some(s) => acc ! file
-        case None => acc ! "NotFound"
-      }
+      acc ! r.findAllMatchIn(Source.fromFile(file).mkString).toSeq
       stopActor = true
     }
     case _ => new Error("Incorrect msg")
@@ -65,6 +62,7 @@ class Accumulator extends BaseActor {
 }
 
 case class BaseDirMsg(dir: File)
+case class Result(dir: File, matches: Seq[String])
 
 trait BaseActor extends Actor {
   def stopActor: Boolean
