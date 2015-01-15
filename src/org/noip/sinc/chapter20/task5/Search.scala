@@ -3,7 +3,7 @@ package org.noip.sinc.chapter20.task5
 import java.io.File
 
 import scala.actors.Actor
-import scala.collection.immutable.TreeSet
+import scala.collection.immutable.{TreeMap, TreeSet}
 import scala.io.Source
 import scala.util.matching.Regex
 
@@ -37,7 +37,7 @@ case class Matcher(r: Regex, acc: Accumulator) extends BaseActor {
 
   val onReceive: PartialFunction[Any, Unit] = {
     case BaseDirMsg(file) => {
-      acc ! Result(r.findAllMatchIn(Source.fromFile(file).mkString).map(_.matched).toSet)
+      acc ! Result(file.getAbsolutePath -> r.findAllMatchIn(Source.fromFile(file).mkString).map(_.matched).toSet)
       stopActor = true
     }
     case _ => new Error("Incorrect msg")
@@ -48,20 +48,25 @@ class Accumulator extends BaseActor {
 
   var fcnt = -1
   var received = 0
-  var result = TreeSet[String]()
+  var result = TreeMap[String, TreeSet[String]]()
 
   def stopActor = fcnt >= 0 && received >= fcnt
 
   val onReceive: PartialFunction[Any, Unit] = {
-    case Result(r) => result ++= r; received += 1
+    case Result(p) => {
+      p._2 foreach {k => result += k -> (result.getOrElse(k, TreeSet[String]()) + p._1)}
+      received += 1
+    }
     case cnt: Int => fcnt = cnt
   }
 
-  override def beforeExit() = result foreach println
+  override def beforeExit() = result foreach {
+    case (k, v) => println(k); v foreach println; println("-" * 80)
+  }
 }
 
 case class BaseDirMsg(dir: File)
-case class Result(matches: Set[String])
+case class Result(p: (String, Set[String]))
 
 trait BaseActor extends Actor {
   def stopActor: Boolean
