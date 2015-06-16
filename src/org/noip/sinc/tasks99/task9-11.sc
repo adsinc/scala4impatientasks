@@ -15,3 +15,14 @@ def pack[T](ls: List[T]): List[List[T]] = {
   loop(ls.tail, List()).reverse
 }
 pack(List('a, 'a, 'a, 'a, 'b, 'c, 'c, 'a, 'a, 'd, 'e, 'e, 'e, 'e))
+
+def encode[T](ls: List[T]): List[(Int, T)] =
+  pack(ls) map (e => e.length -> e.head)
+
+encode(List('a, 'a, 'a, 'a, 'b, 'c, 'c, 'a, 'a, 'd, 'e, 'e, 'e, 'e))
+
+def encodeModified[T](ls: List[T]): List[Any] = {
+  encode(ls) map(p => if(p._1 == 1) p._2 else p)
+}
+
+encodeModified(List('a, 'a, 'a, 'a, 'b, 'c, 'c, 'a, 'a, 'd, 'e, 'e, 'e, 'e))
