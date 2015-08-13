@@ -21,7 +21,7 @@
   (println (apply str (map #(str % "\n") board))))
 
 
-(pprint glifer)
+;(pprint glifer)
 
 (defn neighbours
   [[x y]]
@@ -122,5 +122,42 @@
   [board]
   (vec (map step-row (window (repeat nil) board))))
 
-(= (nth (iterate indexed-step glifer) 8)
-   (nth (iterate index-free-step glifer) 8))
+;(= (nth (iterate indexed-step glifer) 8)
+;   (nth (iterate index-free-step glifer) 8))
+
+(defn step
+  "Возвращает следующее состояние мира"
+  [cells]
+  (set (for [[loc n] (frequencies (mapcat neighbours cells))
+             :when (or (= n 3) (and (= n 2) (cells loc)))]
+         loc)))
+
+;(->> (iterate step #{[2 0] [2 1] [2 2] [1 2] [0 1]})
+;     (drop 8)
+;     first
+;     (populate (empty-board 6 6))
+;     pprint)
+
+(defn stepper
+  "Возвращает функцию step для реализации клеточного автомата.
+  neighbours принимает коррдинаты и возвращает упорядоченную коллекцию
+  координат. Функции survive? и birth? - это предикаты, проверяющие
+  число живых соседей."
+  [neighbours birth? survive?]
+  (fn [cells]
+    (set (for [[loc n] (frequencies (mapcat neighbours cells))
+               :when (if (cells loc) (survive? n) (birth? n))]
+           loc))))
+
+(defn hex-neighbours
+  [[x y]]
+   (for [dx [-1 0 1] dy (if (zero? dx) [-2 2] [-1 1])]
+     [(+ dx x) (+ dy y)]))
+
+(def hex-step (stepper hex-neighbours #{2} #{3 4}))
+
+(hex-step #{[0 0] [1 1] [1 3] [0 4]})
+
+(hex-step *1)
+(hex-step *1)
+(hex-step *1)
