@@ -1,5 +1,7 @@
 (ns org.noip.sinc.clojure.labirint
-  (:import (javax.swing JFrame)))
+  (:import (javax.swing JFrame JPanel JScrollPane)
+           (java.awt Graphics2D BasicStroke Color Dimension))
+  (:require [clojure.zip :as z]))
 
 (defn maze
   "Возвращает случайный вырезанный лабиринт; стены - это множество
@@ -47,11 +49,11 @@
 
 (defn draw
   [w h maze]
-  (doto (javax.swing.JFrame. "Maze")
+  (doto (JFrame. "Maze")
     (.setContentPane
-      (doto (proxy [javax.swing.JPanel] []
+      (doto (proxy [JPanel] []
               (paintComponent [^java.awt.Graphics g]
-                (let [g (doto ^java.awt.Graphics2D (.create g)
+                (let [g (doto ^Graphics2D (.create g)
                                                    (.scale 10 10)
                                                    (.translate 1.5 1.5)
                                                    (.setStroke (java.awt.BasicStroke. 0.4)))]
@@ -90,12 +92,12 @@
 
 (defn hex-draw
   [w h maze]
-  (doto (javax.swing.JFrame. "Maze")
+  (doto (JFrame. "Maze")
     (.setContentPane
-      (doto (proxy [javax.swing.JPanel] []
+      (doto (proxy [JPanel] []
               (paintComponent [^java.awt.Graphics g]
                 (let [maze (into maze (hex-outer-walls w h))
-                      g (doto ^java.awt.Graphics2D (.create g)
+                      g (doto ^Graphics2D (.create g)
                           (.scale 10 10)
                           (.translate 1.5 1.5)
                           (.setStroke (java.awt.BasicStroke. 0.4
@@ -118,4 +120,72 @@
     .pack
     (.setVisible true)))
 
-(hex-draw 30 30 (maze (hex-grid 30 30)))
+;(hex-draw 30 30 (maze (hex-grid 30 30)))
+
+;(def labirinth (let [g (grid 10 10)] (reduce disj g (maze g))))
+
+;(def theseus (rand-nth (distinct (apply concat labirinth))))
+
+;(def minotaur (rand-nth (distinct (apply concat labirinth))))
+
+(defn ariadne-zip
+  [labirinth loc]
+  (let [paths (reduce (fn [index [a b]]
+                      (merge-with into index {a [b] b [a]}))
+                      {} (map seq labirinth))
+        children (fn [[from to]]
+                   (seq (for [loc (paths to)
+                              :when (not= loc from)]
+                          [to loc])))]
+    (z/zipper (constantly true)
+                        children
+                        nil
+                        [nil loc])))
+
+;(->> theseus
+;     (ariadne-zip labirinth)
+;     (iterate clojure.zip/next)
+;     (filter #(= minotaur (second (z/node %))))
+;     first clojure.zip/path
+;     (map second))
+
+(defn draw-with-path
+  [w h maze path]
+  (doto (JFrame. "Theseus Maze")
+    (.setContentPane
+      (JScrollPane.
+        (doto (proxy [JPanel] []
+                (paintComponent [g]
+                  (let [g (doto ^Graphics2D (.create g)
+                            (.scale 10 10)
+                            (.translate 1.5 1.5)
+                            (.setStroke (BasicStroke. 0.4)))]
+                    (.drawRect g -1 -1 w h)
+                    (doseq [[[xa ya] [xb yb]] (map sort maze)]
+                      (let [[xc yc] (if (= xa xb)
+                                      [(dec xa) ya]
+                                      [xa (dec ya)])]
+                        (.drawLine g xa ya xc yc)))
+                    (.translate g -0.5 -0.5)
+                    (.setColor g Color/RED)
+                    (doseq [[[xa ya] [xb yb]] path]
+                      (.drawLine g xa ya xb yb)))))
+          (.setPreferredSize (Dimension.
+                               (* 10 (inc w)) (* 10 (inc h)))))))
+    .pack
+    (.setDefaultCloseOperation JFrame/EXIT_ON_CLOSE)
+    (.setVisible true)))
+
+(let [w 50 h 50
+      grid (grid w h)
+      walls (maze grid)
+      labyrinth (reduce disj grid walls)
+      places (distinct (apply concat labyrinth))
+      theseus (rand-nth places)
+      minotaur (rand-nth places)
+      path (->> theseus
+                (ariadne-zip labyrinth)
+                (iterate z/next)
+                (filter #(= minotaur (first (z/node %))))
+                first z/path rest)]
+  (draw-with-path w h walls path))
