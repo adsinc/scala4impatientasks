@@ -65,10 +65,11 @@
 (defn heal
   [healer target]
   (dosync
-    (let [aid (* (rand 0.1) (:mana @healer))]
+    (let [aid (min (* (rand 0.1) (:mana @healer))
+                   (- (:max-health @target) (:health @target)))]
       (when (pos? aid)
         (commute healer update-in [:mana] - (max 5 (/ aid 5)))
-        (commute target update-in [:health] + aid)))))
+        (alter target update-in [:health] + aid)))))
 
 (def alive? (comp pos? :health))
 
@@ -78,3 +79,20 @@
               (alive? @other)
               (action character other))
     (Thread/sleep (rand-int 50))))
+
+(defn- enforce-max-health
+  [name health]
+  (fn [character-data]
+    (or (<= (:health character-data) health)
+        (throw (IllegalStateException.
+                 (str name " is already at max health!"))))))
+
+(defn character
+  [name & {:as opts}]
+  (let [cdata (merge {:name name :items #{} :health 500}
+                     opts)
+    cdata (assoc cdata :max-health (:health cdata))
+    validators (list* (enforce-max-health name (:health cdata))
+                      (:validators cdata))]
+    (ref (dissoc cdata :validators)
+         :validator #(every? (fn [v] (v %)) validators))))
