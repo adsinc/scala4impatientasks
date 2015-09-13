@@ -78,3 +78,10 @@
               (alive? @other)
               (action character other))
     (Thread/sleep (rand-int 50))))
+
+(def a "A simple value" 5)
+
+(defn b
+  "A simple calcultation using `a`"
+  [c]
+  (+ a c))
