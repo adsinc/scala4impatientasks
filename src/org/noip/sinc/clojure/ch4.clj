@@ -1,4 +1,5 @@
-(ns org.noip.sinc.clojure.ch4)
+(ns org.noip.sinc.clojure.ch4
+  (:import (java.net HttpURLConnection)))
 
 (defmacro futures
   [n & exprs]
@@ -95,4 +96,25 @@
     validators (list* (enforce-max-health name (:health cdata))
                       (:validators cdata))]
     (ref (dissoc cdata :validators)
-         :validator #(every? (fn [v] (v %)) validators))))
+         :validator #(every? (fn [v] (v %)) validators))))    (Thread/sleep (rand-int 50))))
+
+(def a "A simple value" 5)
+
+(defn b
+  "A simple calcultation using `a`"
+  [c]
+  (+ a c))
+
+(def ^:dynamic *response-code* nil)
+
+(defn http-get
+  [url-string]
+  (let [conn (cast java.net.HttpURLConnection (-> url-string java.net.URL. .openConnection))
+        responce-code (.getResponseCode conn)]
+    (when (thread-bound? #'*response-code*)
+      (set! *response-code* responce-code))
+    (when (not= 404 responce-code) (-> conn .getInputStream slurp))))
+
+(binding [*response-code* nil]
+  (let [content (http-get "http://google.com/bad-url")]
+    (println "Responce code was:" *response-code*)))
