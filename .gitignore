@@ -31,3 +31,6 @@ project/plugins/project/
 hs_err_pid*
 
 ssc# Created by .ignore support plugin (hsz.mobi)
+
+*.iml
+.idea
