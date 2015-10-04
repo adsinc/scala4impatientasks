@@ -96,7 +96,7 @@
     validators (list* (enforce-max-health name (:health cdata))
                       (:validators cdata))]
     (ref (dissoc cdata :validators)
-         :validator #(every? (fn [v] (v %)) validators))))    (Thread/sleep (rand-int 50))))
+         :validator #(every? (fn [v] (v %)) validators))))
 
 (def a "A simple value" 5)
 
@@ -118,3 +118,36 @@
 (binding [*response-code* nil]
   (let [content (http-get "http://google.com/bad-url")]
     (println "Responce code was:" *response-code*)))
+
+(require '[clojure.java.io :as io])
+
+(def console (agent *out*))
+(def character-log (agent (io/writer "character-states.log" :append true)))
+
+(defn write
+  [^java.io.Writer w & content]
+  (doseq [x (interpose " " content)]
+    (.write w (str x)))
+  (doto w
+    (.write "\n")
+    .flush))
+
+(defn log-reference
+  [reference & writer-agents]
+  (add-watch reference :log
+             (fn [_ reference old new]
+               (doseq [writer-agent writer-agents]
+                 (send-off writer-agent write new)))))
+
+(def smaug (character "Smaug" :health 500 :strength 400))
+(def bilbo (character "Bilbo" :health 100 :strength 100))
+(def gandalf (character "Gandalf" :health 75 :mana 1000))
+
+(log-reference bilbo console character-log)
+(log-reference smaug console character-log)
+(log-reference gandalf console character-log)
+
+(wait-futures 1
+              (play bilbo attack smaug)
+              (play smaug attack bilbo)
+              (play gandalf heal bilbo))
