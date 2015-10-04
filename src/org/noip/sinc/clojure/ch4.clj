@@ -57,10 +57,17 @@
               (while (fixed-loot smaug bilbo))
               (while (fixed-loot smaug gandalf)))
 
+(def daylight (ref 1))
+
+(declare console)
+(declare write)
+
 (defn attack
   [agressor target]
   (dosync
-    (let [damage (* (rand 0.1) (:strength @agressor))]
+    (let [damage (* (rand 0.1) (:strength @agressor) (ensure daylight))]
+      (send-off console write
+                (:name @agressor) "hits" (:name @target) "for" damage)
       (commute target update-in [:health] #(max 0 (- % damage))))))
 
 (defn heal
@@ -69,6 +76,8 @@
     (let [aid (min (* (rand 0.1) (:mana @healer))
                    (- (:max-health @target) (:health @target)))]
       (when (pos? aid)
+        (send-off console write
+                  (:name @healer) "heals" (:name @target) "for" aid)
         (commute healer update-in [:mana] - (max 5 (/ aid 5)))
         (alter target update-in [:health] + aid)))))
 
@@ -147,7 +156,11 @@
 (log-reference smaug console character-log)
 (log-reference gandalf console character-log)
 
-(wait-futures 1
-              (play bilbo attack smaug)
-              (play smaug attack bilbo)
-              (play gandalf heal bilbo))
+;(wait-futures 1
+;              (play bilbo attack smaug)
+;              (play smaug attack bilbo)
+;              (play gandalf heal bilbo))
+;
+;(dosync
+;  (alter smaug assoc :health 500)
+;  (alter bilbo assoc :health 100))
