@@ -1,4 +1,5 @@
-(ns org.noip.sinc.clojure.web-robot)
+(ns org.noip.sinc.clojure.web-robot
+  (:import (java.util.concurrent LinkedBlockingDeque BlockingQueue)))
 
 (import '(java.net MalformedURLException URL))
 (use '[clojure.string :only (lower-case)])
@@ -21,3 +22,52 @@
          (mapcat (partial re-seq #"\w+"))
          (remove (partial re-matches #"\d+"))
          (map lower-case))))
+
+(def url-queue (LinkedBlockingDeque.))
+(def crawled-urls (atom #{}))
+(def word-freqs (atom #{}))
+
+(declare get-url)
+
+(def agents
+  (set (repeatedly 25 #(agent {::t #'get-url :queue url-queue}))))
+
+(declare run process handle-results)
+
+(defn ^::blocking get-url
+      [{:keys [^BlockingQueue queue] :as state}]
+      (let [url (as-url (.take queue))]
+        (try
+          (if (@crawled-urls url)
+            state
+            {:url url
+             :content (slurp url)
+             ::t #'process})
+          (catch Exception e
+            ;; пропустить URL, вызвавший ошибку при загрузке содержимого
+            state)
+          (finally (run *agent*)))))
+
+(defn process
+  [{:keys [url content]}]
+  (try
+    (let [html (enlive/html-resource (java.io.StringReader. content))]
+      {::t #'handle-results
+       :url url
+       :links (links-from url html)
+       :words (reduce (fn [m word]
+                        (update-in m [word] (fnil inc 0)))
+                      {}
+                      (words-from html))})
+    (finally (run *agent*))))
+
+(defn ^::blocking handle-results
+  [{:keys [url links words]}]
+  (try
+    (swap! crawled-urls conj url)
+    (doseq [url links]
+      (.put url-queue url))
+    (swap! word-freqs (partial merge-with +) words)
+
+    {::t #'get-url :queue url-queue}
+    (finally (run *agent*))))
