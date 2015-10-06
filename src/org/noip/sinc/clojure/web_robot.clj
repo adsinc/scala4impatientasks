@@ -1,6 +1,6 @@
-(ns org.noip.sinc.clojure.web-robot
-  (:import (java.util.concurrent LinkedBlockingDeque BlockingQueue)))
+(ns org.noip.sinc.clojure.web-robot)
 
+(import '(java.util.concurrent LinkedBlockingDeque BlockingQueue))
 (import '(java.net MalformedURLException URL))
 (use '[clojure.string :only (lower-case)])
 (require '[net.cgrand.enlive-html :as enlive])
@@ -71,3 +71,44 @@
 
     {::t #'get-url :queue url-queue}
     (finally (run *agent*))))
+
+(defn paused? [agent] (::paused (meta agent)))
+
+(defn run
+  ([] (doseq [a agents] (run a)))
+  ([a]
+   (when (agents a)
+     (send a (fn [{transition ::t :as state}]
+               (when-not (paused? *agent*)
+                         (let [dispatch-fn (if (-> transition meta ::blocking)
+                                             send-off
+                                             send)]
+                           (dispatch-fn *agent* transition)))
+               state)))))
+
+(defn pause
+  ([] (doseq [a agents] (pause a)))
+  ([a] (alter-meta! a assoc ::paused true)))
+
+(defn restart
+  ([] (doseq [a agents] (restart a)))
+  ([a]
+   (alter-meta! a dissoc ::paused)
+   (run a)))
+
+(defn test-crawler
+  "Сбрасывает веб-робота в исходное состояние, добавляет указанный URL
+  в url-queue и запускает работа на 60 секунд. Возвращает вектор,
+  содержащий количество просмотренных URL и число URL, накопленных
+  в процессе обхода, которые еще не были посещены."
+  [agent-count starting-url]
+  (def agents (set (repeatedly agent-count
+                               #(agent {::t #'get-url :queue url-queue}))))
+  (.clear url-queue)
+  (swap! crawled-urls empty)
+  (swap! word-freqs empty)
+  (.add url-queue starting-url)
+  (run)
+  (Thread/sleep 60000)
+  (pause)
+  [(count @crawled-urls) (count url-queue)])
