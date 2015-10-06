@@ -3,6 +3,7 @@
 (import '(java.util.concurrent LinkedBlockingDeque BlockingQueue))
 (import '(java.net MalformedURLException URL))
 (use '[clojure.string :only (lower-case)])
+(use '[clojure.java.io :only (as-url)])
 (require '[net.cgrand.enlive-html :as enlive])
 
 (defn- links-from
