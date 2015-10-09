@@ -110,6 +110,6 @@
   (swap! word-freqs empty)
   (.add url-queue starting-url)
   (run)
-  (Thread/sleep 60000)
+  (Thread/sleep 5000)
   (pause)
   [(count @crawled-urls) (count url-queue)])
