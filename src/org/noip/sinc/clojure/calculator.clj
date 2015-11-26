@@ -29,12 +29,12 @@
 ;(map create-button operations)
 
 (defn create-panel [conf]
-  "Создает главную панель"
+  "РЎРѕР·РґР°РµС‚ РіР»Р°РІРЅСѓСЋ РїР°РЅРµР»СЊ"
   (let [{rows :rows  cols :cols} conf]
     (JPanel. (GridLayout. rows cols 5 5))))
 
 (defn create-window []
-  "Создает окно калькулятора"
+  "РЎРѕР·РґР°РµС‚ РѕРєРЅРѕ РєР°Р»СЊРєСѓР»СЏС‚РѕСЂР°"
   (doto (JFrame. "Calculator")
     (.setContentPane (create-panel))
     (.pack)
