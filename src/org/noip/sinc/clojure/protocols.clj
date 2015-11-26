@@ -1,6 +1,8 @@
 (ns org.noip.sinc.clojure.protocols
   (:import (clojure.lang IDeref)
-           (org.noip.sinc.clojure.protocols Matrix)))
+           (org.noip.sinc.clojure.protocols Matrix)
+           (java.awt.event ActionListener)
+           (java.io FileFilter)))
 
 (defprotocol Matrix
   "Протокол для работы с 2-мерными структурами данных"
@@ -107,3 +109,16 @@
   (cols [pt]
         [[(:x pt) (:y pt)]])
   (dims [pt] [2 1]))
+
+(defn listener
+  [f]
+  (reify
+    java.awt.event.ActionListener
+    (actionPerformed [this e]
+      (f e))))
+
+(.listFiles (java.io.File. ".")
+            (reify
+              java.io.FileFilter
+              (accept [this f]
+                (.isDirectory f))))
