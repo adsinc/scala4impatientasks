@@ -19,18 +19,14 @@ val operationsByName = operations.groupBy(_.name)
 
 val payedByName = operationsByName.map{case (name, ops) => (name, sumAmount(ops))}
 
-def createTotal(payedByName: Map[String, Money]) = {
-  def makeColumn(column: Seq[Any]) = {
-    val cols = column.map(_.toString)
-    val maxWidth = cols.map(_.length).max
-    def normalise(value: String) =
-      value + (" " * (maxWidth - value.length))
-    cols.map(normalise)
-  }
-  val header = ("Name", "Payed")
-  val table = payedByName
-  makeColumn(payedByName.map(_.1))
-  makeColumn(payedByName.map(_.2))
-}
+val data = payedByName map { case (name, value) => s"$name $value"} mkString "\n"
 
-createTotal(payedByName)
+val shouldBe = totalPayed * 1.0 / names.length
+
+val res = Seq(
+  data,
+  "-" * 10,
+  s"Total: $totalPayed",
+  s"Each must pay: $shouldBe"
+)
+println(res mkString "\n")
