@@ -19,14 +19,21 @@ val operationsByName = operations.groupBy(_.name)
 
 val payedByName = operationsByName.map{case (name, ops) => (name, sumAmount(ops))}
 
-val data = payedByName map { case (name, value) => s"$name $value"} mkString "\n"
+def mapToStringSeq(map: Map[_, _]) = map map { case (name, value) => s"$name $value" }
 
 val shouldBe = totalPayed * 1.0 / names.length
 
+val diffByName = payedByName map {case (name, value) => (name, shouldBe - value)}
+
 val res = Seq(
-  data,
+  mapToStringSeq(payedByName),
+  "Diffs:",
+  mapToStringSeq(diffByName),
   "-" * 10,
   s"Total: $totalPayed",
   s"Each must pay: $shouldBe"
 )
-println(res mkString "\n")
+println(res map {
+  case seq: Seq[_] => seq mkString "\n"
+  case s: String => s
+} mkString "\n")
