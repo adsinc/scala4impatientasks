@@ -20,6 +20,9 @@ class TransferMain extends Actor {
       case WireTransfer.Done =>
         println("success")
         context stop self
+      case WireTransfer.Failed =>
+        println("failed")
+        context stop self
     }
   }
 }
