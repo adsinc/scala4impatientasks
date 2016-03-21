@@ -1,7 +1,8 @@
-import org.noip.sinc.bro.Table
+import org.noip.sinc.bro.Table.T
 
-Table() |
+val table = T |
   "User" | "Amount" ||
   "Roman" | 10 ||
   "Oleg" | 100
 
+table.maxWidths
