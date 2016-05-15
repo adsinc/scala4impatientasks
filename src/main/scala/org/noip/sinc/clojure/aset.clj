@@ -1,10 +1,11 @@
 (ns org.noip.sinc.clojure.aset
-  (:import (clojure.lang IPersistentSet IPersistentCollection Seqable)
-           (java.util Set)))
+  (:import (clojure.lang IPersistentSet IPersistentCollection Seqable IFn ArityException)
+           (java.util Set Collection)))
 
 (declare empty-array-set)
 
 (def ^:private ^:const max-size 4)
+
 (deftype ArraySet [^objects items
                    ^int size
                    ^:unsynchronized-mutable ^int hashcode]
@@ -54,13 +55,42 @@
   (equals [this that]
     (or
       (identical? this that)
-      (and (or (instance? Set that)
-               (instance? IPersistentSet that))
+      (and (instance? Set that)
            (= (count this) (count that))
-           (every? #(contains? this %) that)))))
+           (every? #(contains? this %) that))))
+  IFn
+  (invoke [this key] (get this key))
+  (applyTo [this args]
+    (when (not= 1 (count args))
+      (throw (ArityException. (count args) "ArraySet")))
+    (this (first args)))
+  Set
+  (isEmpty [_] (zero? size))
+  (size [_] size)
+  (toArray [_ array]
+    (.toArray ^Collection (sequence items) array))
+  (toArray [this] (into-array (seq this)))
+  (iterator [this] (.iterator ^Collection (sequence this)))
+  (containsAll [this coll]
+    (every? #(contains? this %) coll)))
 
 (def ^:private empty-array-set (ArraySet. (object-array max-size) 0 -1))
 
 (defn array-set
   [& vals]
   (into empty-array-set vals))
+
+(defn microbenchmark
+  [f & {:keys [size trials] :or {size 4 trials 1e6}}]
+  (let [items (repeatedly size gensym)]
+    (time (loop [s (apply f items)
+                 n trials]
+            (when (pos? n)
+              (doseq [x items] (contains? s x))
+              (let [x (rand-nth items)]
+                (recur (-> s (disj x) (conj x)) (dec n))))))))
+
+(doseq [n (range 1 5)
+        f [#'array-set #'hash-set]]
+  (print n (-> f meta :name) ": ")
+  (microbenchmark @f :size n))
