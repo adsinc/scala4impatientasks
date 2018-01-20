@@ -20,7 +20,7 @@ object Task1 {
     }
   }
 
-  val el = new Ellipse2D.Double(5, 10, 20, 30) with RectangleLike[Double]
+  val el = new Ellipse2D.Double(5, 10, 20, 30) with RectangleLike
   el.grow(10, 10)
   el.translate(10, 10)
 }
