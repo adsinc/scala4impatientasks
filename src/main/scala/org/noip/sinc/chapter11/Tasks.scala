@@ -2,7 +2,7 @@ package org.noip.sinc.chapter11
 
 import java.io.File
 
-import org.noip.sinc.chapter11.Tasks.{BitSequence, RichFile}
+import org.noip.sinc.chapter11.Tasks.{BitSequence, RichFile, RichFileSeq}
 
 object Tasks {
 
@@ -42,6 +42,11 @@ object Tasks {
       }
     }
   }
+
+  object RichFileSeq {
+    def unapplySeq(file: File): Option[Seq[String]] =
+      Some(file.getAbsolutePath split File.separator filterNot (_.isEmpty))
+  }
 }
 
 object BitSequenceTest extends App {
@@ -53,7 +58,10 @@ object BitSequenceTest extends App {
 }
 
 object UnapplyTest extends App {
-  val f = new File("hello")
+  val f = new File("/org/noip/sinc/hello.txt")
   val RichFile(dir, file, ext) = f
   println(s"$dir $file $ext")
+
+  val RichFileSeq(a, b, c, d) = f
+  println(s"$a $b $c $d")
 }
