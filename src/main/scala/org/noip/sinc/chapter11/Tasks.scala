@@ -54,16 +54,27 @@ object Tasks {
 
   class DynamicProps(val props: java.util.Properties) extends Dynamic {
     def updateDynamic(name: String)(value: String) =
-      props.put(name, value)
+      new PathPart(name, props)
 
-    def selectDynamic(name: String) =
-      props.getProperty(name)
+    def selectDynamic(name: String): PathPart =
+        new PathPart(name, props)
 
     def applyDynamicNamed(name: String)(args: (String, String)*) = {
       require(name == "add")
       for((k, v) <- args)
         props.put(k, v)
     }
+  }
+
+  class PathPart(val path: String, props: Properties) extends Dynamic {
+    def updateDynamic(name: String)(value: String) =
+      props.put(this.path + '.' + name, value)
+
+    def selectDynamic(name: String): PathPart = {
+      new PathPart(path + '.' + name, props)
+    }
+
+    override def toString: String = props.getProperty(path)
   }
 }
 
@@ -86,8 +97,9 @@ object UnapplyTest extends App {
 
 object DynamicTest extends App {
   val p = new DynamicProps(System.getProperties)
-  p.add(test="testProp")
-  p.test2 = "testProp2"
-  println(p.test)
-  println(p.test2)
+  println(p.java)
+  println(p.java.home)
+
+  p.hello.worls.ya = "10"
+  println(p.hello.worls.ya)
 }
