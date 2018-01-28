@@ -1,8 +1,12 @@
 package org.noip.sinc.chapter11
 
 import java.io.File
+import java.util.Properties
 
-import org.noip.sinc.chapter11.Tasks.{BitSequence, RichFile, RichFileSeq}
+import org.noip.sinc.chapter11.Tasks.{BitSequence, DynamicProps, RichFile, RichFileSeq}
+
+import scala.collection.mutable
+import scala.language.dynamics
 
 object Tasks {
 
@@ -47,6 +51,20 @@ object Tasks {
     def unapplySeq(file: File): Option[Seq[String]] =
       Some(file.getAbsolutePath split File.separator filterNot (_.isEmpty))
   }
+
+  class DynamicProps(val props: java.util.Properties) extends Dynamic {
+    def updateDynamic(name: String)(value: String) =
+      props.put(name, value)
+
+    def selectDynamic(name: String) =
+      props.getProperty(name)
+
+    def applyDynamicNamed(name: String)(args: (String, String)*) = {
+      require(name == "add")
+      for((k, v) <- args)
+        props.put(k, v)
+    }
+  }
 }
 
 object BitSequenceTest extends App {
@@ -64,4 +82,12 @@ object UnapplyTest extends App {
 
   val RichFileSeq(a, b, c, d) = f
   println(s"$a $b $c $d")
+}
+
+object DynamicTest extends App {
+  val p = new DynamicProps(System.getProperties)
+  p.add(test="testProp")
+  p.test2 = "testProp2"
+  println(p.test)
+  println(p.test2)
 }
