@@ -4,8 +4,8 @@ import java.io.File
 import java.util.Properties
 
 import org.noip.sinc.chapter11.Tasks.{BitSequence, DynamicProps, RichFile, RichFileSeq}
+import org.noip.sinc.chapter11.XML.XMLElement
 
-import scala.collection.mutable
 import scala.language.dynamics
 
 object Tasks {
@@ -102,4 +102,77 @@ object DynamicTest extends App {
 
   p.hello.worls.ya = "10"
   println(p.hello.worls.ya)
+}
+
+object XML {
+
+  class XMLElement(val name: String,
+                   val attrs: Map[String, Any],
+                   val children: Seq[XMLElement]) extends Dynamic {
+
+    def selectDynamic(name: String): XMLElementSeq = XMLElementSeq {
+      children.filter(_.name == name)
+    }
+
+    def applyDynamicNamed(name: String)(args: (String, Any)*): XMLElementSeq =
+      XMLElementSeq(children).applyDynamicNamed(name)(args: _*)
+
+    override def toString: String = s"name=$name attrs=$attrs children=$children"
+  }
+
+  object XMLElement {
+    def apply(name: String = "root",
+              attrs: Map[String, Any] = Map.empty,
+              children: Seq[XMLElement] = Seq.empty) =
+      new XMLElement(name, attrs, children)
+  }
+
+  class XMLElementSeq(val elements: Seq[XMLElement]) extends Dynamic {
+    def selectDynamic(name: String): XMLElementSeq = XMLElementSeq {
+      elements.flatMap(e => e.children.filter(_.name == name))
+    }
+
+    def applyDynamicNamed(name: String)(args: (String, Any)*): XMLElementSeq = XMLElementSeq {
+      selectDynamic(name).elements.filter(e =>
+        args.forall { case (a, v) => e.attrs(a) == v }
+      )
+    }
+
+    override def toString: String = s"$elements"
+  }
+
+  object XMLElementSeq {
+    def apply(elements: Seq[XMLElement]) = new XMLElementSeq(elements)
+  }
+
+}
+
+object XMLTest extends App {
+  val xml = XMLElement(
+    children = Seq(XMLElement(
+      name = "html",
+      children = Seq(XMLElement(
+        name = "body",
+        children = Seq(
+          XMLElement(
+            "ul",
+            Map("id" -> 42),
+            Seq(
+              XMLElement("li", Map("style" -> "test1")),
+              XMLElement("li", Map("style" -> "test2"))
+            )
+          ),
+          XMLElement(
+            "ul",
+            Map("id" -> 43),
+            Seq(
+              XMLElement("li", Map("style" -> "test3")),
+              XMLElement("li", Map("style" -> "test4"))
+            )
+          )
+        ))
+      ))
+    ))
+
+  println(xml.html.body.ul(id = 42).li)
 }
