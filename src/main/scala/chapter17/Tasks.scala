@@ -13,6 +13,20 @@ object Tasks {
 
   def doTogether[T, U, V](f: T => Future[U], g: T => Future[V]): T => Future[(U, V)] =
     t => f(t) zip g(t)
+
+  def join[T](fs: Seq[Future[T]]): Future[Seq[T]] =
+    fs.foldLeft(Future.successful(Seq.empty[T])) { (acc, ft) =>
+      for {
+        xs <- acc
+        t <- ft
+      } yield xs :+ t
+    }
+
+  def join2[T](fs: Seq[Future[T]]): Future[Seq[T]] =
+    fs.foldLeft(Future.successful(Seq.empty[T])) { (acc, ft) =>
+      acc flatMap (s => ft map (s :+ _))
+    }
+
 }
 
 object Test1 extends App {
@@ -62,4 +76,20 @@ object Test4 extends App {
   )
 
   println(Await.ready(res("   Hello  "), 1.second))
+}
+
+object Test5 extends App {
+  val res = Tasks.join2(Seq(
+    Future.successful(1),
+    Future.successful(2)
+  ))
+
+  println(Await.ready(res, 1.second))
+
+  val res2 = Future.sequence(Seq(
+    Future.successful(1),
+    Future.successful(2)
+  ))
+  println(Await.ready(res2, 1.second))
+
 }
