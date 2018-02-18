@@ -5,9 +5,10 @@ import java.util.concurrent.Executors
 import org.noip.sinc.chapter13.Tasks.time
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent._
 import scala.concurrent.duration._
-import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutor, Future}
 import scala.io.{Source, StdIn}
+import scala.util.{Failure, Success}
 
 object Tasks {
   def doInOrder[T, U, V](f: T => Future[U], g: U => Future[V]): T => Future[V] =
@@ -173,4 +174,26 @@ object Test11 extends App {
   Await.ready(Future.sequence(fs), 1000.second)
 
   pool.shutdown()
+}
+
+object Test12 extends App {
+
+  def findRefLengths(url: String): Seq[Future[Int]] = {
+    val pattern = """href="(https?://[^"]*)"""".r
+    val refs = pattern.findAllMatchIn(Source.fromURL(url).mkString)
+      .map(m => m.group(1))
+      .toSeq
+    val ps = refs.map(_ -> Promise[Int]()).toMap
+    ps.foreach { case (ref, pr) =>
+      Future(Source.fromURL(ref).size) onComplete {
+        case Success(l) => pr.success(l)
+        case Failure(_) => pr.success(0)
+      }
+    }
+    (ps.values map (_.future)).toSeq
+  }
+
+  val f = Future.sequence(findRefLengths("https://eax.me/page/34/"))
+  Await.ready(f, 100.second)
+  println(f)
 }
