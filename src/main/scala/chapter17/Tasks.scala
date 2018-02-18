@@ -5,7 +5,7 @@ import org.noip.sinc.chapter13.Tasks.time
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
-import scala.io.StdIn
+import scala.io.{Source, StdIn}
 
 object Tasks {
   def doInOrder[T, U, V](f: T => Future[U], g: U => Future[V]): T => Future[V] =
@@ -133,4 +133,27 @@ object Test7 extends App {
       Await.ready(result, 1000.second)
     }
   }
+}
+
+object Test8 extends App {
+
+  def requestUrl = Future {
+    println("Enter url")
+    StdIn.readLine()
+  }
+
+  def readUrl(url: String) = Future {
+    Source.fromURL(url).mkString
+  }
+
+  def findAllHRefs(html: String) = Future {
+    val href = """href="[^"]*"""".r
+    href.findAllIn(html).foreach(println)
+  }
+
+  val result = requestUrl flatMap readUrl flatMap findAllHRefs recover {
+    case e => println(s"Error: ${e.getMessage}")
+  }
+
+  Await.ready(result, 1000.second)
 }
