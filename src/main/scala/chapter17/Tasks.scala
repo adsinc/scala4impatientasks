@@ -3,6 +3,7 @@ package chapter17
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
+import scala.io.StdIn
 
 object Tasks {
   def doInOrder[T, U, V](f: T => Future[U], g: U => Future[V]): T => Future[V] =
@@ -27,6 +28,11 @@ object Tasks {
       acc flatMap (s => ft map (s :+ _))
     }
 
+  def repeat[T](action: => T, until: T => Boolean): Future[T] =
+    Future(action).flatMap { t =>
+      if (until(t)) Future.successful(t)
+      else repeat(action, until)
+    }
 }
 
 object Test1 extends App {
@@ -92,4 +98,17 @@ object Test5 extends App {
   ))
   println(Await.ready(res2, 1.second))
 
+}
+
+object Test6 extends App {
+  val password = Tasks.repeat[String](
+    {
+      println("Enter password")
+      StdIn.readLine()
+    },
+    {
+      Thread.sleep(1000)
+      _ == "secret"
+    })
+  println(Await.ready(password, 1000.second))
 }
