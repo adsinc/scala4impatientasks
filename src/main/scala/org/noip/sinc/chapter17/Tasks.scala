@@ -197,3 +197,31 @@ object Test12 extends App {
   Await.ready(f, 100.second)
   println(f)
 }
+
+object Test13 extends App {
+
+  val from = 100000
+  val to = Int.MaxValue
+  val step = (to - from) / 8
+
+  def isPalindrome(s: String) = s == s.reverse
+
+  val p = Promise[BigInt]()
+
+  Range.inclusive(from, to, step)
+    .map(x => x until x + step)
+    .foreach(xs => Future {
+      val it = xs.iterator
+      while (!p.isCompleted && it.hasNext) {
+        val xi = BigInt(it.next())
+        val primePalindrome = xi.isProbablePrime(10000) && isPalindrome(xi.toString())
+        if (primePalindrome) {
+          p.trySuccess(xi)
+        }
+      }
+    })
+
+  val result = p.future
+  Await.ready(result, 1000.second)
+  println(result)
+}
