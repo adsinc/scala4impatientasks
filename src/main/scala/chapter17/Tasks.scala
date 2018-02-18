@@ -1,10 +1,12 @@
 package chapter17
 
+import java.util.concurrent.Executors
+
 import org.noip.sinc.chapter13.Tasks.time
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutor, Future}
 import scala.io.{Source, StdIn}
 
 object Tasks {
@@ -156,4 +158,19 @@ object Test8 extends App {
   }
 
   Await.ready(result, 1000.second)
+}
+
+object Test11 extends App {
+  def printTime(): Unit = {
+    Thread.sleep(3000)
+    println(System.currentTimeMillis())
+  }
+
+  val pool = Executors.newCachedThreadPool()
+  implicit val ex: ExecutionContextExecutor = ExecutionContext.fromExecutor(pool)
+
+  val fs = (1 to 80).map(_ => Future(printTime()))
+  Await.ready(Future.sequence(fs), 1000.second)
+
+  pool.shutdown()
 }
