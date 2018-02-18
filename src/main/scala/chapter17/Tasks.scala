@@ -1,5 +1,7 @@
 package chapter17
 
+import org.noip.sinc.chapter13.Tasks.time
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
@@ -111,4 +113,24 @@ object Test6 extends App {
       _ == "secret"
     })
   println(Await.ready(password, 1000.second))
+}
+
+object Test7 extends App {
+
+  for (_ <- 1 to 5) {
+    time {
+      val n = 3000000
+
+      def countPrime(xs: Seq[BigInt]) =
+        xs count (x => x.isProbablePrime(1000000))
+
+      val intervalCounts = (1 to n)
+        .grouped(n / 8)
+        .map(xs => Future {
+          countPrime(xs map BigInt.apply)
+        })
+      val result = Future.sequence(intervalCounts).map(_.sum)
+      Await.ready(result, 1000.second)
+    }
+  }
 }
