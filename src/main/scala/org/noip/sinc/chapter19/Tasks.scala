@@ -105,3 +105,20 @@ object Test7 extends App {
 
   withClose(new Closable("Alex"))(x => println(x.name))
 }
+
+object Test8 extends App {
+  def printValues[T <: {def apply(n : Int) : Int}](o: T, from: Int, to: Int): Unit = {
+    var i = from
+    while (i <= to) {
+      print(o.apply(i) + " ")
+      i += 1
+    }
+    println()
+  }
+
+  val f = (x: Int) => x * x
+  println(f.apply(10))
+
+  printValues(Array(1, 2, 3, 4, 5, 7, 88, 9), 3, 6)
+  printValues(f, 3, 6)
+}
