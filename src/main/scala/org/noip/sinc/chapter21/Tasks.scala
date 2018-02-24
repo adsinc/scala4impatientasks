@@ -28,6 +28,13 @@ object Tasks {
       def divideBy(x: BigDecimal, n: Int): BigDecimal = x / n
     }
 
+    implicit object NumberLikeString extends NumberLike[String] {
+      def plus(x: String, y: String): String = x + y
+
+      def divideBy(x: String, n: Int): String =
+        x.zipWithIndex.filter(_._2 % n == 0).map(_._1).toString()
+    }
+
   }
 
   def average[T](xs: Seq[T])(implicit ev: NumberLike[T]): T = {
@@ -45,5 +52,6 @@ object Test2 extends App {
 object Test11 extends App {
   println(average(1.to(20, 3).map(_.toDouble)))
   println(average(1.to(20, 3).map(BigDecimal.apply)))
+  println(average(Seq("Hello", "World")))
 }
 
